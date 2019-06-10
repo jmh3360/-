@@ -3,6 +3,25 @@
 <html>
 <head>
 <meta http-equiv="Content-type" content="text/html; charset= UTF-8" charset="UTF-8">
+<style>
+	.uploadResult {
+		width: 100%;
+		background-color: gray;
+	}
+	.uploadResult ul{
+		display: flex;
+		flex-flow: row;
+		justify-content: center;
+		align-items: center;
+	}
+	.uploadResult ul li {
+		list-style: none;
+		padding: 10px;
+	}
+	.uploadResult ul li img{
+		width: 20px;
+	}
+</style>
 <title>Insert title here</title>
 </head>
 <body>
@@ -10,6 +29,9 @@
 	<input type="file" name="uploadFile" multiple/>
 	</div>
 	<button id="uploadBtn">Upload</button>
+	<div class="uploadResult">
+		<ul></ul>
+	</div>
 	<script
   src="https://code.jquery.com/jquery-3.4.1.js" integrity="sha256-WpOohJOqMqqyKL9FccASB9O0KwACQJpFTUBLTYOVvVU=" crossorigin="anonymous">
 	</script>
@@ -18,6 +40,25 @@
 $(document).ready(function(){
 	var regex = new RegExp("(.*?)\.(exe|sh|zip|alz)$");
 	var maxSize = 5242880; //5MB
+	var cloneObj = $(".uploadDiv").clone();
+	var uploadResult = $(".uploadResult ul");
+	
+	function showUploadedFile(uploadResultArr){
+		var str = "";
+		console.log(uploadResultArr);
+		$(uploadResultArr).each(function(i,obj){
+			if (!obj.image) {
+			str +=  "<li><img src='/resources/img/attach.png'>"+obj.fileName+"</li>"
+			} else {
+				/* str += "<li>"+obj.fileName+"</li>"; */
+				var fileCallPath = encodeURIComponent(obj.uploadPath + "/s_"+obj.uuid+"_"+obj.fileName);
+				console.log(fileCallPath);
+				str +=  "<li>	<img src='/display?fileName="+fileCallPath+"'>"+obj.fileName+"</li>"
+			}
+		});
+		console.log(str);
+		uploadResult.append(str);
+	}
 	
 	function checkExtension(fileName, fileSize){
 		if (fileSize >= maxSize) {
@@ -36,7 +77,6 @@ $(document).ready(function(){
 		var formData = new FormData();
 		var inputFile =$("input[name='uploadFile']");
 		var files = inputFile[0].files;
-		console.log(files);
 		
 		for (var i = 0; i < files.length; i++) {
 			
@@ -54,7 +94,8 @@ $(document).ready(function(){
 			data:formData,
 			type:'POST',
 			success:function(result){
-				alert("Uploaded");
+				showUploadedFile(result);
+				$(".uploadDiv").html(cloneObj.html());
 			}
 		});
 		
